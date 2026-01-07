@@ -37,5 +37,41 @@ const userLoginValidator = () => {
     ]
 }
 
+const userChangeCurrentPasswordValidator = () => {
+    return [
+        body("currentPassword").notEmpty().withMessage("Current password is required")
+            .isLength({ min: 8 }).withMessage("Password must be at least 8 characters")
+            .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/).withMessage("Password must contain at least one number one alphabet and one special character"),
+        body("newPassword").notEmpty().withMessage("New password is required")
+            .isLength({ min: 8 }).withMessage("Password must be at least 8 characters")
+            .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/).withMessage("Password must contain at least one number one alphabet and one special character")
+    ]
+}
 
-export {userRegisterValidator, userLoginValidator}
+const userForgotPasswordValidator = () => {
+    return [
+        body("email")
+            .trim()
+            .notEmpty().withMessage("Email is required")
+            .isLowercase().withMessage("Email must be lowercase")
+            .isEmail().withMessage("Email is not valid"),
+    ]
+}
+
+const userResetForgotPasswordValidator = () => {
+    return [
+        body("newPassword")
+            .trim()
+            .notEmpty().withMessage("Password is required")
+            .isLength({ min: 8 }).withMessage("Password must be at least 8 characters")
+            .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/).withMessage("Password must contain at least one number one alphabet and one special character"),
+    ]
+}
+
+export {
+    userRegisterValidator,
+    userLoginValidator,
+    userChangeCurrentPasswordValidator,
+    userForgotPasswordValidator,
+    userResetForgotPasswordValidator
+}

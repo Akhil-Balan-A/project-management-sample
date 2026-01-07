@@ -4,7 +4,7 @@ import { ApiError } from '../utils/api-error.js';
 import { asyncHandler } from '../utils/async-handler.js';
 import jwt from 'jsonwebtoken';
 import { sendEmail,emailVerificationMailgenContent,forgotPasswordMailgenContent } from '../utils/mail.js';
-import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const generateAccessAndRefreshTtokens = async (userId) => {
     try {
@@ -132,7 +132,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Verification token is missing.');
   }
 
-  let hashedToken = crypteo.createHash('sha256').update(verificationToken).digest('hex');
+  let hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
   const user = await User.findOne({ emailVerificationToken: hashedToken, emailVerificationExpiry: { $gt: Date.now() } });
 
@@ -166,9 +166,9 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });//validateBeforeSave: false is used to skip validation on save
 
     await sendEmail({
-        email: email,
+        email: user.email,
         subject: "Verify your email",
-        mailGenContent: emailVerificationMailgenContent(username, `${req.protocol}://${req.get('host')}/api/v1/users/verify-email/${unHashedToken}`),
+        mailGenContent: emailVerificationMailgenContent(user.username, `${req.protocol}://${req.get('host')}/api/v1/users/verify-email/${unHashedToken}`),
     });
   
     return res
@@ -231,7 +231,6 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
   user.forgotPasswordToken = hashedToken;
   user.forgotPasswordExpiry = tokenExpiry;
   await user.save({ validateBeforeSave: false });//validateBeforeSave: false is used to skip validation on save
-
   await sendEmail({
     email: email,
     subject: "Reset your password",
@@ -294,7 +293,6 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
   
 });
-
 
 export {
   registerUser,
