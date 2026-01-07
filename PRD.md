@@ -1,168 +1,180 @@
-# Project Management App (Jira-like) – PRD
+# Product Requirements Document (PRD)
 
-## 1. Overview
+## Project Camp Backend
 
-A web-based project management application inspired by Jira, designed to help teams plan, track, and manage software projects efficiently using boards, issues, workflows, and roles.
+### 1. Product Overview
 
----
+**Product Name:** Project Camp Backend  
+**Version:** 1.0.0  
+**Product Type:** Backend API for Project Management System
 
-## 2. Problem Statement
+Project Camp Backend is a RESTful API service designed to support collaborative project management. The system enables teams to organize projects, manage tasks with subtasks, maintain project notes, and handle user authentication with role-based access control.
 
-Teams struggle with:
+### 2. Target Users
 
-- Tracking tasks across multiple stages
-- Clear ownership of issues
-- Visibility into project progress
-- Overly complex tools for small teams
+- **Project Administrators:** Create and manage projects, assign roles, oversee all project activities
+- **Project Admins:** Manage tasks and project content within assigned projects
+- **Team Members:** View projects, update task completion status, access project information
 
-This product aims to solve these problems with a clean, focused experience.
+### 3. Core Features
 
----
+#### 3.1 User Authentication & Authorization
 
-## 3. Goals & Objectives
+- **User Registration:** Account creation with email verification
+- **User Login:** Secure authentication with JWT tokens
+- **Password Management:** Change password, forgot/reset password functionality
+- **Email Verification:** Account verification via email tokens
+- **Token Management:** Access token refresh mechanism
+- **Role-Based Access Control:** Three-tier permission system (Admin, Project Admin, Member)
 
-### Primary Goals
+#### 3.2 Project Management
 
-- Enable teams to create and track projects
-- Provide visual task tracking using boards
-- Support role-based access
+- **Project Creation:** Create new projects with name and description
+- **Project Listing:** View all projects user has access to with member count
+- **Project Details:** Access individual project information
+- **Project Updates:** Modify project information (Admin only)
+- **Project Deletion:** Remove projects (Admin only)
 
-### Success Metrics
+#### 3.3 Team Member Management
 
-- Users can create a project in under 2 minutes
-- Tasks move between stages with zero confusion
-- Clear visibility of task ownership
+- **Member Addition:** Invite users to projects via email
+- **Member Listing:** View all project team members
+- **Role Management:** Update member roles within projects (Admin only)
+- **Member Removal:** Remove team members from projects (Admin only)
 
----
+#### 3.4 Task Management
 
-## 4. Target Users
+- **Task Creation:** Create tasks with title, description, and assignee
+- **Task Listing:** View all tasks within a project
+- **Task Details:** Access individual task information
+- **Task Updates:** Modify task information and status
+- **Task Deletion:** Remove tasks from projects
+- **File Attachments:** Support for multiple file attachments on tasks
+- **Task Assignment:** Assign tasks to specific team members
+- **Status Tracking:** Three-state status system (Todo, In Progress, Done)
 
-### User Personas
+#### 3.5 Subtask Management
 
-1. **Project Manager**
-   - Creates projects
-   - Assigns tasks
-   - Tracks progress
+- **Subtask Creation:** Add subtasks to existing tasks
+- **Subtask Updates:** Modify subtask details and completion status
+- **Subtask Deletion:** Remove subtasks (Admin/Project Admin only)
+- **Member Completion:** Allow members to mark subtasks as complete
 
-2. **Developer**
-   - Works on assigned issues
-   - Updates task status
+#### 3.6 Project Notes
 
-3. **Admin**
-   - Manages users and permissions
+- **Note Creation:** Add notes to projects (Admin only)
+- **Note Listing:** View all project notes
+- **Note Details:** Access individual note content
+- **Note Updates:** Modify existing notes (Admin only)
+- **Note Deletion:** Remove notes (Admin only)
 
----
+#### 3.7 System Health
 
-## 5. Core Features (MVP)
+- **Health Check:** API endpoint for system status monitoring
 
-### 5.1 Authentication & Authorization
+### 4. Technical Specifications
 
-- User signup & login
-- Role-based access control
-- Secure session handling
+#### 4.1 API Endpoints Structure
 
----
+**Authentication Routes** (`/api/v1/auth/`)
 
-### 5.2 Projects
+- `POST /register` - User registration
+- `POST /login` - User authentication
+- `POST /logout` - User logout (secured)
+- `GET /current-user` - Get current user info (secured)
+- `POST /change-password` - Change user password (secured)
+- `POST /refresh-token` - Refresh access token
+- `GET /verify-email/:verificationToken` - Email verification
+- `POST /forgot-password` - Request password reset
+- `POST /reset-password/:resetToken` - Reset forgotten password
+- `POST /resend-email-verification` - Resend verification email (secured)
 
-- Create, update, delete projects
-- Project description and metadata
-- Project members
+**Project Routes** (`/api/v1/projects/`)
 
----
+- `GET /` - List user projects (secured)
+- `POST /` - Create project (secured)
+- `GET /:projectId` - Get project details (secured, role-based)
+- `PUT /:projectId` - Update project (secured, Admin only)
+- `DELETE /:projectId` - Delete project (secured, Admin only)
+- `GET /:projectId/members` - List project members (secured)
+- `POST /:projectId/members` - Add project member (secured, Admin only)
+- `PUT /:projectId/members/:userId` - Update member role (secured, Admin only)
+- `DELETE /:projectId/members/:userId` - Remove member (secured, Admin only)
 
-### 5.3 Boards (Kanban)
+**Task Routes** (`/api/v1/tasks/`)
 
-- Columns:
-  - Backlog
-  - To Do
-  - In Progress
-  - Review
-  - Done
-- Drag and drop tasks
-- Column customization (future)
+- `GET /:projectId` - List project tasks (secured, role-based)
+- `POST /:projectId` - Create task (secured, Admin/Project Admin)
+- `GET /:projectId/t/:taskId` - Get task details (secured, role-based)
+- `PUT /:projectId/t/:taskId` - Update task (secured, Admin/Project Admin)
+- `DELETE /:projectId/t/:taskId` - Delete task (secured, Admin/Project Admin)
+- `POST /:projectId/t/:taskId/subtasks` - Create subtask (secured, Admin/Project Admin)
+- `PUT /:projectId/st/:subTaskId` - Update subtask (secured, role-based)
+- `DELETE /:projectId/st/:subTaskId` - Delete subtask (secured, Admin/Project Admin)
 
----
+**Note Routes** (`/api/v1/notes/`)
 
-### 5.4 Issues / Tasks
+- `GET /:projectId` - List project notes (secured, role-based)
+- `POST /:projectId` - Create note (secured, Admin only)
+- `GET /:projectId/n/:noteId` - Get note details (secured, role-based)
+- `PUT /:projectId/n/:noteId` - Update note (secured, Admin only)
+- `DELETE /:projectId/n/:noteId` - Delete note (secured, Admin only)
 
-- Create issue
-- Edit issue
-- Assign issue
-- Set priority:
-  - Low
-  - Medium
-  - High
-- Set issue type:
-  - Bug
-  - Task
-  - Story
+**Health Check** (`/api/v1/healthcheck/`)
 
----
+- `GET /` - System health status
 
-### 5.5 Comments & Activity
+#### 4.2 Permission Matrix
 
-- Comment on issues
-- Show activity log per issue
+| Feature                    | Admin | Project Admin | Member |
+| -------------------------- | ----- | ------------- | ------ |
+| Create Project             | ✓     | ✗             | ✗      |
+| Update/Delete Project      | ✓     | ✗             | ✗      |
+| Manage Project Members     | ✓     | ✗             | ✗      |
+| Create/Update/Delete Tasks | ✓     | ✓             | ✗      |
+| View Tasks                 | ✓     | ✓             | ✓      |
+| Update Subtask Status      | ✓     | ✓             | ✓      |
+| Create/Delete Subtasks     | ✓     | ✓             | ✗      |
+| Create/Update/Delete Notes | ✓     | ✗             | ✗      |
+| View Notes                 | ✓     | ✓             | ✓      |
 
----
+#### 4.3 Data Models
 
-## 6. Non-Goals (Out of Scope)
+**User Roles:**
 
-- Advanced reporting (burn-down charts)
-- Mobile app
-- Third-party integrations (Slack, GitHub)
+- `admin` - Full system access
+- `project_admin` - Project-level administrative access
+- `member` - Basic project member access
 
----
+**Task Status:**
 
-## 7. User Flow (High Level)
+- `todo` - Task not started
+- `in_progress` - Task currently being worked on
+- `done` - Task completed
 
-1. User signs up
-2. Creates a project
-3. Creates issues
-4. Assigns issues
-5. Moves issues across board
-6. Project completion
+### 5. Security Features
 
----
+- JWT-based authentication with refresh tokens
+- Role-based authorization middleware
+- Input validation on all endpoints
+- Email verification for account security
+- Secure password reset functionality
+- File upload security with Multer middleware
+- CORS configuration for cross-origin requests
 
-## 8. Technical Assumptions
+### 6. File Management
 
-- Web-based application
-- REST API backend
-- Database for persistence
-- Authentication using JWT or sessions
+- Support for multiple file attachments on tasks
+- Files stored in public/images directory
+- File metadata tracking (URL, MIME type, size)
+- Secure file upload handling
 
----
+### 7. Success Criteria
 
-## 9. Constraints & Risks
-
-- Initial version limited to small teams
-- Performance with large boards not guaranteed
-- Learning curve for first-time users
-
----
-
-## 10. Future Enhancements
-
-- Sprint planning
-- Issue dependencies
-- Notifications
-- Analytics dashboard
-- Integrations (GitHub, Slack)
-
----
-
-## 11. Open Questions
-
-- Should issues support file attachments?
-- Do we need project templates?
-- Should roles be customizable?
-
----
-
-## 12. References
-
-- [Jira](https://www.atlassian.com/software/jira)
-- [GitHub](https://github.com)
-- [Slack](https://slack.com)
+- Secure user authentication and authorization system
+- Complete project lifecycle management
+- Hierarchical task and subtask organization
+- Role-based access control implementation
+- File attachment capability for enhanced collaboration
+- Email notification system for user verification and password reset
+- Comprehensive API documentation through endpoint structure
